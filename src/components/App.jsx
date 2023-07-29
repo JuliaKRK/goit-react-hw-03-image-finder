@@ -54,8 +54,8 @@ class App extends Component {
     }));
   };
 
-  handleImageClick = imageUrl => {
-    this.setState({ selectedImage: imageUrl });
+  handleImageClick = largeImageUrl => {
+    this.setState({ selectedImage: largeImageUrl });
     this.toggleModal();
   };
 
