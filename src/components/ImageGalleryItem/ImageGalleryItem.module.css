@@ -1,0 +1,16 @@
+.galleryItem {
+  display: inline-block;
+  margin: 8px;
+  cursor: pointer;
+}
+
+.galleryImage {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  transition: transform 250ms ease;
+}
+
+.galleryImage:hover {
+  transform: scale(1.03);
+}
