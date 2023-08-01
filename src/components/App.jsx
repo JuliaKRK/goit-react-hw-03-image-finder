@@ -6,7 +6,6 @@ import Loader from './Loader/Loader';
 import Button from './Button/Button';
 import Modal from './Modal/Modal';
 import styles from './App.module.css';
-import PropTypes from 'prop-types';
 
 const API_KEY = '37181386-1c0d920a7929ae22641c44c4d';
 const BASE_URL = 'https://pixabay.com/api/';
@@ -20,6 +19,8 @@ class App extends Component {
     showModal: false,
     selectedImage: null,
     noResults: false,
+    totalPages: null, // Додайте змінну для загальної кількості сторінок
+    currentPage: null, // Додайте змінну для поточної сторінки
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -34,6 +35,8 @@ class App extends Component {
       page: 1,
       images: [],
       noResults: false,
+      totalPages: null,
+      currentPage: null,
     });
   };
 
@@ -47,14 +50,13 @@ class App extends Component {
       .get(url)
       .then(response => {
         const newImages = response.data.hits;
-        if (newImages.length === 0) {
-          this.setState({ noResults: true });
-        } else {
-          this.setState(prevState => ({
-            images: [...prevState.images, ...newImages],
-            page: prevState.page + 1,
-          }));
-        }
+        const totalHits = response.data.totalHits;
+        const totalPages = Math.ceil(totalHits / 12); // Отримати загальну кількість сторінок
+        this.setState(prevState => ({
+          images: [...prevState.images, ...newImages],
+          totalPages: totalPages,
+          currentPage: prevState.page,
+        }));
       })
       .catch(error => {
         alert('Error fetching images: ' + error.message);
@@ -74,15 +76,23 @@ class App extends Component {
   };
 
   render() {
-    const { images, isLoading, showModal, selectedImage, noResults } =
-      this.state;
+    const {
+      images,
+      isLoading,
+      showModal,
+      selectedImage,
+      noResults,
+      totalPages,
+      currentPage,
+    } = this.state;
 
-    const hasMoreImages = images.length > 0 && !isLoading && !noResults;
+    const hasMoreImages =
+      totalPages !== null && currentPage !== null && currentPage < totalPages;
 
     return (
       <div className={styles.App}>
         <Searchbar onSubmit={this.handleFormSubmit} />
-        {noResults ? (
+        {noResults && images.length === 0 ? (
           <div className={styles.noResults}>No images found</div>
         ) : (
           images.length > 0 && (
