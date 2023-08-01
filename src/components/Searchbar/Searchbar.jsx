@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import styles from './Searchbar.module.css';
+import PropTypes from 'prop-types';
 
 class Searchbar extends Component {
   state = {
@@ -37,5 +38,9 @@ class Searchbar extends Component {
     );
   }
 }
+
+Searchbar.propTypes = {
+  onSubmit: PropTypes.func.isRequired, // Функція-зворотний виклик для обробки подання форми.
+};
 
 export default Searchbar;

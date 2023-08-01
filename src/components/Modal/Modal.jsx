@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './Modal.module.css';
+import PropTypes from 'prop-types';
 
 class Modal extends Component {
   componentDidMount() {
@@ -24,7 +25,7 @@ class Modal extends Component {
   };
 
   render() {
-    const { open, imageSrc, alt } = this.props;
+    const { open, largeImageUrl, alt } = this.props;
 
     if (!open) {
       return null;
@@ -33,12 +34,19 @@ class Modal extends Component {
     return createPortal(
       <div className={styles.overlay} onClick={this.handleOverlayClick}>
         <div className={styles.modal}>
-          <img src={imageSrc} alt={alt} />
+          <img src={largeImageUrl} alt={alt} className={styles.modalImage} />
         </div>
       </div>,
       document.getElementById('modal-root')
     );
   }
 }
+
+Modal.propTypes = {
+  open: PropTypes.bool.isRequired, // Пропс, що вказує, чи має бути показане модальне вікно.
+  largeImageUrl: PropTypes.string.isRequired, // URL великого зображення для відображення в модальному вікні.
+  alt: PropTypes.string.isRequired, // Альтернативний текст для зображення.
+  onClose: PropTypes.func.isRequired, // Функція-зворотний виклик для закриття модального вікна.
+};
 
 export default Modal;

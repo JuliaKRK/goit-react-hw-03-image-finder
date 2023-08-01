@@ -6,6 +6,7 @@ import Loader from './Loader/Loader';
 import Button from './Button/Button';
 import Modal from './Modal/Modal';
 import styles from './App.module.css';
+import PropTypes from 'prop-types';
 
 const API_KEY = '37181386-1c0d920a7929ae22641c44c4d';
 const BASE_URL = 'https://pixabay.com/api/';
@@ -18,6 +19,7 @@ class App extends Component {
     isLoading: false,
     showModal: false,
     selectedImage: null,
+    noResults: false,
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -27,24 +29,36 @@ class App extends Component {
   }
 
   handleFormSubmit = query => {
-    this.setState({ searchQuery: query, page: 1, images: [] });
+    this.setState({
+      searchQuery: query,
+      page: 1,
+      images: [],
+      noResults: false,
+    });
   };
 
   fetchImages = () => {
     const { searchQuery, page } = this.state;
     const url = `${BASE_URL}?q=${searchQuery}&page=${page}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=12`;
 
-    this.setState({ isLoading: true });
+    this.setState({ isLoading: true, noResults: false });
 
     axios
       .get(url)
       .then(response => {
-        this.setState(prevState => ({
-          images: [...prevState.images, ...response.data.hits],
-          page: prevState.page + 1,
-        }));
+        const newImages = response.data.hits;
+        if (newImages.length === 0) {
+          this.setState({ noResults: true });
+        } else {
+          this.setState(prevState => ({
+            images: [...prevState.images, ...newImages],
+            page: prevState.page + 1,
+          }));
+        }
       })
-      .catch(error => console.error('Error fetching images:', error))
+      .catch(error => {
+        alert('Error fetching images: ' + error.message);
+      })
       .finally(() => this.setState({ isLoading: false }));
   };
 
@@ -60,17 +74,27 @@ class App extends Component {
   };
 
   render() {
-    const { images, isLoading, showModal, selectedImage } = this.state;
+    const { images, isLoading, showModal, selectedImage, noResults } =
+      this.state;
+
+    const hasMoreImages = images.length > 0 && !isLoading && !noResults;
+
     return (
       <div className={styles.App}>
         <Searchbar onSubmit={this.handleFormSubmit} />
-        {images.length > 0 && (
-          <ImageGallery images={images} onImageClick={this.handleImageClick} />
+        {noResults ? (
+          <div className={styles.noResults}>No images found</div>
+        ) : (
+          images.length > 0 && (
+            <ImageGallery
+              images={images}
+              onImageClick={this.handleImageClick}
+            />
+          )
         )}
         {isLoading && <Loader />}
-        {images.length > 0 && !isLoading && (
-          <Button onClick={this.fetchImages} />
-        )}
+
+        {hasMoreImages && <Button onClick={this.fetchImages} />}
         {showModal && (
           <Modal
             open={showModal}
