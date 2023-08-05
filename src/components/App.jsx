@@ -44,19 +44,27 @@ class App extends Component {
     const { searchQuery, page } = this.state;
     const url = `${BASE_URL}?q=${searchQuery}&page=${page}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=12`;
 
-    this.setState({ isLoading: true, noResults: false });
+    this.setState({ isLoading: true });
 
     axios
       .get(url)
       .then(response => {
         const newImages = response.data.hits;
         const totalHits = response.data.totalHits;
-        const totalPages = Math.ceil(totalHits / 12); // Отримати загальну кількість сторінок
-        this.setState(prevState => ({
-          images: [...prevState.images, ...newImages],
-          totalPages: totalPages,
-          currentPage: prevState.page,
-        }));
+        const totalPages = Math.ceil(totalHits / 12);
+
+        if (newImages.length === 0) {
+          // Якщо немає отриманих зображень, встановлюємо noResults в true
+          this.setState({ noResults: true });
+        } else {
+          // Інакше додаємо зображення до списку та оновлюємо стан
+          this.setState(prevState => ({
+            images: [...prevState.images, ...newImages],
+            totalPages: totalPages,
+            currentPage: prevState.page,
+            noResults: false, // Встановлюємо noResults в false, тому що є зображення
+          }));
+        }
       })
       .catch(error => {
         alert('Error fetching images: ' + error.message);
@@ -92,7 +100,7 @@ class App extends Component {
     return (
       <div className={styles.App}>
         <Searchbar onSubmit={this.handleFormSubmit} />
-        {noResults && images.length === 0 ? (
+        {images.length === 0 && noResults ? (
           <div className={styles.noResults}>No images found</div>
         ) : (
           images.length > 0 && (
