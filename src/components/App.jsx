@@ -83,6 +83,15 @@ class App extends Component {
     this.toggleModal();
   };
 
+  handleLoadMore = () => {
+    this.setState(
+      prevState => ({
+        page: prevState.page + 1,
+      }),
+      this.fetchImages
+    );
+  };
+
   render() {
     const {
       images,
@@ -112,7 +121,7 @@ class App extends Component {
         )}
         {isLoading && <Loader />}
 
-        {hasMoreImages && <Button onClick={this.fetchImages} />}
+        {hasMoreImages && <Button onClick={this.handleLoadMore} />}
         {showModal && (
           <Modal
             open={showModal}
